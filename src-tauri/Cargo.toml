@@ -1,11 +1,11 @@
 [package]
-name = "kaelie-app"
+name = "Study-Tracker"
 version = "0.1.0"
 description = "Pixel quest timer with category leveling."
 authors = ["you"]
 license = "MIT"
 repository = ""
-default-run = "kaelie-app"
+default-run = "Study-Tracker"
 edition = "2021"
 rust-version = "1.70"
 
