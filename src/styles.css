@@ -1,0 +1,61 @@
+:root {
+  --bg0: #1a0b2e;
+  --bg1: #2b0f4a;
+  --panel: rgba(255, 255, 255, 0.06);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.74);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+
+  background:
+    radial-gradient(circle at 18% 12%, rgba(186, 85, 255, 0.20), transparent 48%),
+    radial-gradient(circle at 78% 18%, rgba(120, 70, 255, 0.18), transparent 45%),
+    radial-gradient(circle at 45% 90%, rgba(255, 90, 210, 0.12), transparent 52%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  background-attachment: fixed;
+}
+
+/* Subtle pixel grid. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035) 0 1px,
+      rgba(255, 255, 255, 0) 1px 14px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.035) 0 1px,
+      rgba(255, 255, 255, 0) 1px 14px
+    );
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: rgba(80, 183, 255, 0.28);
+}
