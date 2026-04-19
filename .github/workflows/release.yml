@@ -24,20 +24,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: ubuntu-24.04
-            args: ""
-          - platform: windows-latest
-            args: ""
-          # Build both macOS architectures (you can later switch to a universal build if desired).
-          - platform: macos-latest
-            args: "--target aarch64-apple-darwin"
-          - platform: macos-latest
-            args: "--target x86_64-apple-darwin"
-    runs-on: ${{ matrix.platform }}
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      CI: "true"
     steps:
       - uses: actions/checkout@v4
 
@@ -66,48 +56,13 @@ jobs:
             librsvg2-dev \
             patchelf
 
-      - name: Add macOS Rust targets
-        if: runner.os == 'macOS'
-        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
-
-      - name: Verify macOS signing secrets (required for non-damaged apps)
-        if: runner.os == 'macOS'
-        run: |
-          missing=0
-          for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
-            if [ -z "${!v}" ]; then
-              echo "::error::Missing secret/env var: $v"
-              missing=1
-            fi
-          done
-          if [ "$missing" -ne 0 ]; then
-            echo "::error::macOS builds must be code-signed + notarized, otherwise Gatekeeper may show 'app is damaged'. Add the secrets listed above."
-            exit 1
-          fi
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-
       - name: Install frontend deps
         run: npm install
 
-      - uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # macOS signing + notarization (only used on mac runners; harmless elsewhere)
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - uses: tauri-apps/tauri-action@v0
         with:
           tagName: ${{ needs.prepare.outputs.tag }}
           releaseName: ${{ needs.prepare.outputs.release_name }}
           releaseDraft: false
           prerelease: false
-          args: ${{ matrix.args }}
+
