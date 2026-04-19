@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 import PixelButton from "../components/PixelButton.vue";
 import PixelProgress from "../components/PixelProgress.vue";
+import DailyQuestCard from "../components/DailyQuestCard.vue";
 import { useAppState } from "../lib/useAppState";
 import { formatHMS, formatShort } from "../lib/time";
 
@@ -51,6 +52,12 @@ const totalAfter = computed(() => {
   return category.value.totalSeconds + elapsedSeconds.value;
 });
 
+const catNameById = computed(() => {
+  return Object.fromEntries(
+    Object.values(state.value.categories).map((c) => [c.id, c.name])
+  ) as Record<keyof typeof state.value.categories, string>;
+});
+
 function onEnd() {
   endQuest();
   router.replace("/");
@@ -80,6 +87,12 @@ function onEnd() {
     </section>
 
     <section class="panel">
+      <div class="boss">
+        <div class="boss__k">Boss HP</div>
+        <div class="boss__v">{{ formatShort(remainingToNextHour(totalAfter)) }} remaining</div>
+      </div>
+      <PixelProgress :accent="category.accent" :value="progressFromSeconds(totalAfter)" />
+
       <div class="row">
         <div class="k">Current level</div>
         <div class="v">
@@ -96,7 +109,29 @@ function onEnd() {
         </div>
       </div>
 
-      <PixelProgress :accent="category.accent" :value="progressFromSeconds(totalAfter)" />
+      <div class="streak">
+        <div class="streak__k">Streak</div>
+        <div class="streak__v">{{ state.streak.current }} (best {{ state.streak.best }})</div>
+      </div>
+    </section>
+
+    <section class="dailies">
+      <div class="dailies__hd">
+        <div class="dailies__title">Daily quests</div>
+        <div class="dailies__date">{{ state.daily.date }}</div>
+      </div>
+      <div class="dailies__grid">
+        <DailyQuestCard
+          v-for="q in state.daily.quests"
+          :key="q.id"
+          :quest="q"
+          :daily-seconds-total="state.daily.stats.secondsTotal"
+          :daily-category-seconds="state.daily.stats.categorySeconds"
+          :daily-quests-ended="state.daily.stats.questsEnded"
+          :cat-name-by-id="catNameById"
+          accent="#ba55ff"
+        />
+      </div>
     </section>
   </div>
 </template>
@@ -179,6 +214,28 @@ function onEnd() {
     0 0 0 4px rgba(255, 255, 255, 0.08);
 }
 
+.boss {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.boss__k {
+  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
+
+.boss__v {
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+}
+
 .row {
   display: flex;
   justify-content: space-between;
@@ -203,6 +260,63 @@ function onEnd() {
   font-size: 12px;
 }
 
+.streak {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.streak__k {
+  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
+
+.streak__v {
+  opacity: 0.85;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dailies {
+  margin-top: 14px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.18);
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.85),
+    0 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
+.dailies__hd {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.dailies__title {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  opacity: 0.88;
+}
+
+.dailies__date {
+  opacity: 0.65;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.dailies__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
 @media (max-width: 720px) {
   .top {
     flex-direction: column;
@@ -216,6 +330,13 @@ function onEnd() {
   }
   .v {
     text-align: left;
+  }
+  .boss {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dailies__grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

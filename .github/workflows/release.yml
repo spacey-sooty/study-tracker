@@ -17,7 +17,7 @@ jobs:
       - id: meta
         run: |
           echo "tag=build-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
-          echo "release_name=Kaelie build ${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "release_name=Study Tracker build ${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
 
   build:
     needs: prepare
@@ -65,4 +65,3 @@ jobs:
           releaseName: ${{ needs.prepare.outputs.release_name }}
           releaseDraft: false
           prerelease: false
-

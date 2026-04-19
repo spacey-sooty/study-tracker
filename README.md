@@ -2,6 +2,13 @@
 
 Pixel-art styled quest timer with 6 categories that level up based on time spent.
 
+## Install
+
+After installing the dmg to applications on mac run:
+```
+xattr -dr com.apple.quarantine /Applications/Study\ Tracker.app
+```
+
 ## Features
 - 6 categories, each with:
   - Level = 1 per hour spent
